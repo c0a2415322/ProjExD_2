@@ -32,7 +32,7 @@ def gameover(screen: pg.Surface) -> None:
     """
     引数：screenのSurface
     戻り値：None
-    こうかとんに爆弾が着弾した際に,画面をブラックアウトし,泣いているこうかとん画像と「Game Over」の文字列を5秒間表示させる関数を実装する
+    こうかとんに爆弾が着弾した際、画面をブラックアウトして泣いているこうかとんの画像と、「Game Over」の文字列を5秒間表示させる関数を実装する
     """
     bo_img = pg.Surface((1100, 650))
     pg.draw.rect(bo_img, (0, 0, 0), pg.Rect(0, 0, 1100, 650))
@@ -51,8 +51,8 @@ def gameover(screen: pg.Surface) -> None:
 def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     """
     引数:無し
-    戻り値：タプル（爆弾Surfaceのリスト,加速度のリスト）
-    時間とともに爆弾が拡大し加速する関数
+    戻り値：タプル（爆弾Surfaceのリスト、加速度のリスト）
+    時間の経過につれ爆弾が拡大し加速する関数
     """
     bb_imgs = []
     for r in range(1, 11):
@@ -62,6 +62,27 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         bb_imgs.append(bb_img)
     bb_accs = [a for a in range(1, 11)]
     return bb_imgs, bb_accs
+
+
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    引数：無し
+    戻り値：移動量タプルと対応する画像Surfaceの辞書
+    飛ぶ方向によってこうかとんの画像の向きを切り替えるための関数
+    """
+    kk_img = pg.image.load("fig/3.png")
+    KK_dict = {
+        (0, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+        (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+        (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),
+        (-5, +5): pg.transform.rotozoom(kk_img, 45, 1.0),
+        (0, -5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 90, 1.0),
+        (+5, -5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 45, 1.0),
+        (+5, 0): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), 0, 1.0),
+        (+5, +5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -45, 1.0),
+        (0, +5): pg.transform.rotozoom(pg.transform.flip(kk_img, True, False), -90, 1.0),
+    }
+    return KK_dict
 
 
 def main():
@@ -80,6 +101,7 @@ def main():
     vy = +5
     
     bb_imgs, bb_accs = init_bb_imgs()
+    kk_imgs = get_kk_imgs()
 
     clock = pg.time.Clock()
     tmr = 0
@@ -115,6 +137,7 @@ def main():
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True): # 画面外なら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # 移動をなかったことにする
+        kk_img = kk_imgs[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
