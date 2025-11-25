@@ -48,6 +48,22 @@ def gameover(screen: pg.Surface) -> None:
     time.sleep(5)
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    引数:無し
+    戻り値：タプル（爆弾Surfaceのリスト,加速度のリスト）
+    時間とともに爆弾が拡大し加速する関数
+    """
+    bb_imgs = []
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0, 0, 0))
+        bb_imgs.append(bb_img)
+    bb_accs = [a for a in range(1, 11)]
+    return bb_imgs, bb_accs
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -63,15 +79,21 @@ def main():
     vx = +5
     vy = +5
     
+    bb_imgs, bb_accs = init_bb_imgs()
+
     clock = pg.time.Clock()
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        if kk_rct.colliderect(bb_rct):
+        if kk_rct.colliderect(bb_rct): # ゲームオーバーの表示
             gameover(screen)
             return
+
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
 
         screen.blit(bg_img, [0, 0]) 
         key_lst = pg.key.get_pressed()
@@ -94,12 +116,12 @@ def main():
         if check_bound(kk_rct) != (True, True): # 画面外なら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1]) # 移動をなかったことにする
         screen.blit(kk_img, kk_rct)
+        bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
         if not tate:
             vy *= -1
-        bb_rct.move_ip(vx, vy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
