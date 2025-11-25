@@ -60,7 +60,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
         pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
         bb_img.set_colorkey((0, 0, 0))
         bb_imgs.append(bb_img)
-    bb_accs = [a for a in range(1, 11)]
+    bb_accs = [1,2,3,4,5,6,7,8,9,10]
     return bb_imgs, bb_accs
 
 
